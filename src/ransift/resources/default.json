@@ -1,0 +1,179 @@
+{
+  "schema_version": "harness-role-profile-v1",
+  "profile_id": "dev-v036-final-static-ransom",
+  "parent_profile_id": "",
+  "change_hypothesis": "Default investigator prompts and analysis settings.",
+  "agent_overrides": {
+    "file_discovery": {
+      "role": "file discovery analyst",
+      "responsibility": "Investigate sample-attributed file and directory enumeration, target selection, and their relationship to subsequent file access.",
+      "default_task": "Explain the observed file and directory enumeration, target selection, and their relationship to subsequent file access, retaining relevant findings and limitations.",
+      "exclusions": [
+        "Do not infer encryption, ransom-note contents, or a command's external effect from a filename or invocation alone.",
+        "Do not infer malicious intent from operation counts, a utility name, or a query match alone.",
+        "Do not give self-rated confidence levels, probabilities, or scores; state the observed facts and specific evidentiary limitations."
+      ],
+      "required_checks": [
+        "Separate recorded operations and results from behavioral interpretation and unobserved effects.",
+        "Check process attribution, target continuity, execution order, and relevant benign explanations.",
+        "Report relevant failed attempts and findings outside predefined query patterns; an unmatched pattern is not an absence of behavior.",
+        "Distinguish enumeration of user/shared documents from application-resource lookup, and examine links to subsequent file access."
+      ],
+      "benign_alternatives": [],
+      "tool_strategy": [
+        "Use seeded results as leads. Expand fragments, follow targets, or inspect process timelines when their context could change the interpretation.",
+        "Respect returned limits and truncation; identify unexamined scope when the investigation budget ends."
+      ],
+      "claim_types": []
+    },
+    "file_transformation": {
+      "role": "file transformation analyst",
+      "responsibility": "Investigate sample-attributed file reads, writes, renames, deletion, and the resulting changes to user or shared data.",
+      "default_task": "Explain the observed file reads, writes, renames, deletion, and the resulting changes to user or shared data, retaining relevant findings and limitations.",
+      "exclusions": [
+        "Do not infer encryption, ransom-note contents, or a command's external effect from a filename or invocation alone.",
+        "Do not infer malicious intent from operation counts, a utility name, or a query match alone.",
+        "Do not give self-rated confidence levels, probabilities, or scores; state the observed facts and specific evidentiary limitations.",
+        "Successful writes, paging/non-cached flags, or repeated $MFT/$Bitmap/$LogFile activity alone do not establish intentional metadata corruption; preserve the observations without asserting an unobserved API request or damage."
+      ],
+      "required_checks": [
+        "Separate recorded operations and results from behavioral interpretation and unobserved effects.",
+        "Check process attribution, target continuity, execution order, and relevant benign explanations.",
+        "Report relevant failed attempts and findings outside predefined query patterns; an unmatched pattern is not an absence of behavior.",
+        "Follow source and destination paths through rename, replacement and deletion; distinguish temporary-file commit from alteration of existing user documents.",
+        "Distinguish diagnostic output, runtime unpacking and application configuration from destructive user-data changes.",
+        "Interpret NTFS metadata operations with their recorded paging-I/O and target context; a metadata-like name alone does not prove filesystem damage.",
+        "Writes to key-like artifacts do not establish cryptographic contents or encryption of other files.",
+        "Separate process-attributed filesystem-maintenance I/O from evidence of deliberate raw metadata access; inspect available request context before inferring destruction."
+      ],
+      "benign_alternatives": [],
+      "tool_strategy": [
+        "Use seeded results as leads. Expand fragments, follow targets, or inspect process timelines when their context could change the interpretation.",
+        "Respect returned limits and truncation; identify unexamined scope when the investigation budget ends."
+      ],
+      "claim_types": []
+    },
+    "ransom_note": {
+      "role": "ransom note analyst",
+      "responsibility": "Investigate sample-attributed deployment and contents of possible ransom notes and other extortion artifacts.",
+      "default_task": "Explain the observed deployment and contents of possible ransom notes and other extortion artifacts, retaining relevant findings and limitations.",
+      "exclusions": [
+        "Do not infer encryption, ransom-note contents, or a command's external effect from a filename or invocation alone.",
+        "Do not infer malicious intent from operation counts, a utility name, or a query match alone.",
+        "Do not give self-rated confidence levels, probabilities, or scores; state the observed facts and specific evidentiary limitations.",
+        "Do not invent ransom-note contents from a filename or infer that an uninspected artifact is legitimate output; both interpretations require contextual support.",
+        "Do not require artifact execution, display or successful encryption to report an observed artifact-writing or placement attempt; do not claim extortion content without content evidence."
+      ],
+      "required_checks": [
+        "Separate recorded operations and results from behavioral interpretation and unobserved effects.",
+        "Check process attribution, target continuity, execution order, and relevant benign explanations.",
+        "Report relevant failed attempts and findings outside predefined query patterns; an unmatched pattern is not an absence of behavior.",
+        "Separate deployment of a note-like artifact from observed extortion content; preserve the distinction when contents are unavailable.",
+        "Relate successful artifact creation/writing and any later placement attempts by process, target and time; distinguish each target and each operation result.",
+        "Distinguish observed artifact deployment, inferred purpose and unknown contents; state whether content bytes are actually supplied by an available evidence source."
+      ],
+      "benign_alternatives": [],
+      "tool_strategy": [
+        "Use seeded results as leads. Expand fragments, follow targets, or inspect process timelines when their context could change the interpretation.",
+        "Respect returned limits and truncation; identify unexamined scope when the investigation budget ends."
+      ],
+      "claim_types": []
+    },
+    "registry": {
+      "role": "registry analyst",
+      "responsibility": "Investigate sample-attributed registry changes, persistence configuration, and effects on system or application settings.",
+      "default_task": "Explain the observed registry changes, persistence configuration, and effects on system or application settings, retaining relevant findings and limitations.",
+      "exclusions": [
+        "Do not infer encryption, ransom-note contents, or a command's external effect from a filename or invocation alone.",
+        "Do not infer malicious intent from operation counts, a utility name, or a query match alone.",
+        "Do not give self-rated confidence levels, probabilities, or scores; state the observed facts and specific evidentiary limitations."
+      ],
+      "required_checks": [
+        "Separate recorded operations and results from behavioral interpretation and unobserved effects.",
+        "Check process attribution, target continuity, execution order, and relevant benign explanations.",
+        "Report relevant failed attempts and findings outside predefined query patterns; an unmatched pattern is not an absence of behavior.",
+        "Inspect value names, types, data and successful modification results, distinguishing read-only lookup from persistence or policy changes."
+      ],
+      "benign_alternatives": [],
+      "tool_strategy": [
+        "Use seeded results as leads. Expand fragments, follow targets, or inspect process timelines when their context could change the interpretation.",
+        "Respect returned limits and truncation; identify unexamined scope when the investigation budget ends."
+      ],
+      "claim_types": []
+    },
+    "process": {
+      "role": "process analyst",
+      "responsibility": "Investigate sample-attributed parent-child execution, command lines, delegated operations, termination attempts, and process exit results.",
+      "default_task": "Explain the observed parent-child execution, command lines, delegated operations, termination attempts, and process exit results, retaining relevant findings and limitations.",
+      "exclusions": [
+        "Do not infer encryption, ransom-note contents, or a command's external effect from a filename or invocation alone.",
+        "Do not infer malicious intent from operation counts, a utility name, or a query match alone.",
+        "Do not give self-rated confidence levels, probabilities, or scores; state the observed facts and specific evidentiary limitations."
+      ],
+      "required_checks": [
+        "Separate recorded operations and results from behavioral interpretation and unobserved effects.",
+        "Check process attribution, target continuity, execution order, and relevant benign explanations.",
+        "Report relevant failed attempts and findings outside predefined query patterns; an unmatched pattern is not an absence of behavior.",
+        "Use parent-child relationships and command arguments to explain delegated operations, retaining process exit results and failed termination attempts.",
+        "Ordinary command-shell or utility execution alone does not establish abuse; assess the requested operation and execution context."
+      ],
+      "benign_alternatives": [],
+      "tool_strategy": [
+        "Use seeded results as leads. Expand fragments, follow targets, or inspect process timelines when their context could change the interpretation.",
+        "Respect returned limits and truncation; identify unexamined scope when the investigation budget ends."
+      ],
+      "claim_types": []
+    },
+    "recovery": {
+      "role": "recovery analyst",
+      "responsibility": "Investigate sample-attributed commands and operations affecting shadow copies, backups, and recovery configuration.",
+      "default_task": "Explain the observed commands and operations affecting shadow copies, backups, and recovery configuration, retaining relevant findings and limitations.",
+      "exclusions": [
+        "Do not infer encryption, ransom-note contents, or a command's external effect from a filename or invocation alone.",
+        "Do not infer malicious intent from operation counts, a utility name, or a query match alone.",
+        "Do not give self-rated confidence levels, probabilities, or scores; state the observed facts and specific evidentiary limitations."
+      ],
+      "required_checks": [
+        "Separate recorded operations and results from behavioral interpretation and unobserved effects.",
+        "Check process attribution, target continuity, execution order, and relevant benign explanations.",
+        "Report relevant failed attempts and findings outside predefined query patterns; an unmatched pattern is not an absence of behavior.",
+        "Distinguish recovery discovery and maintenance from destructive requests; separate process creation/start, command completion and observed recovery-artifact changes."
+      ],
+      "benign_alternatives": [],
+      "tool_strategy": [
+        "Use seeded results as leads. Expand fragments, follow targets, or inspect process timelines when their context could change the interpretation.",
+        "Respect returned limits and truncation; identify unexamined scope when the investigation budget ends."
+      ],
+      "claim_types": []
+    },
+    "anti_analysis": {
+      "role": "anti analysis analyst",
+      "responsibility": "Investigate sample-attributed environment discovery, execution delays, evasion attempts, and their observed consequences.",
+      "default_task": "Explain the observed environment discovery, execution delays, evasion attempts, and their observed consequences, retaining relevant findings and limitations.",
+      "exclusions": [
+        "Do not infer encryption, ransom-note contents, or a command's external effect from a filename or invocation alone.",
+        "Do not infer malicious intent from operation counts, a utility name, or a query match alone.",
+        "Do not give self-rated confidence levels, probabilities, or scores; state the observed facts and specific evidentiary limitations."
+      ],
+      "required_checks": [
+        "Separate recorded operations and results from behavioral interpretation and unobserved effects.",
+        "Check process attribution, target continuity, execution order, and relevant benign explanations.",
+        "Report relevant failed attempts and findings outside predefined query patterns; an unmatched pattern is not an absence of behavior.",
+        "Separate ordinary environment queries or waiting from supported evasion behavior; explain whether the observed check changes subsequent execution."
+      ],
+      "benign_alternatives": [],
+      "tool_strategy": [
+        "Use seeded results as leads. Expand fragments, follow targets, or inspect process timelines when their context could change the interpretation.",
+        "Respect returned limits and truncation; identify unexamined scope when the investigation budget ends."
+      ],
+      "claim_types": []
+    }
+  },
+  "analysis_protocol": "evidence-binary-v1",
+  "max_submission_corrections": 1,
+  "investigation_closure": true,
+  "claim_linking": true,
+  "symmetric_review": true,
+  "strict_json_schema": true,
+  "unified_references": true
+}

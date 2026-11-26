@@ -1,0 +1,107 @@
+"""Task-graph execution layer for harness analysis sessions."""
+
+from .behavior import (
+    TASK_BUILD_BEHAVIOR_BLOCKS,
+    TASK_BUILD_BEHAVIOR_INDEX,
+    TASK_NORMALIZE_BEHAVIOR_TRACE,
+    behavior_task_handlers,
+    build_behavior_task_specs,
+    run_behavior_task_graph,
+)
+from .context_composer import ContextComposer
+from .coarse import (
+    TASK_BUILD_COARSE_PROCESS_TREE,
+    TASK_BUILD_LOGICAL_SLICE_INDEX,
+    TASK_COLLECT_PROCESS_FACTS,
+    TASK_TREE_FILTER_EVENTS,
+    build_coarse_task_specs,
+    coarse_task_handlers,
+    run_coarse_task_graph,
+)
+from .evidence import (
+    TASK_RUN_EVIDENCE_PROFILE,
+    build_evidence_profile_task_spec,
+    evidence_task_handlers,
+    run_evidence_profile_task,
+)
+from .models import (
+    AnalysisSessionState,
+    ArtifactRef,
+    ArtifactStore,
+    SessionFact,
+    TaskContext,
+    TaskResult,
+    TaskSpec,
+)
+from .verdict import (
+    TASK_SYNTHESIZE_SAMPLE_VERDICT,
+    build_verdict_task_spec,
+    synthesize_sample_verdict_task,
+    verdict_task_handlers,
+)
+from .verdict_review import (
+    TASK_PRE_REVIEW_SAMPLE_VERDICT,
+    TASK_REVIEW_SAMPLE_VERDICT,
+    TASK_FINALIZE_SAMPLE_DECISION,
+    build_sample_decision_task_spec,
+    build_verdict_pre_review_task_spec,
+    build_verdict_review_task_spec,
+    finalize_sample_decision,
+    finalize_sample_decision_task,
+    pre_review_sample_verdict_task,
+    review_sample_verdict_task,
+    verdict_finalization_task_handlers,
+    verdict_pre_review_task_handlers,
+    verdict_review_task_handlers,
+)
+from .runner import FactBroker, TaskRunner
+from .static import TASK_EXTRACT_STATIC_STRONG_EVIDENCE, build_static_strong_task_spec, static_task_handlers
+
+__all__ = [
+    "ContextComposer",
+    "TASK_RUN_EVIDENCE_PROFILE",
+    "TASK_SYNTHESIZE_SAMPLE_VERDICT",
+    "TASK_PRE_REVIEW_SAMPLE_VERDICT",
+    "TASK_REVIEW_SAMPLE_VERDICT",
+    "TASK_FINALIZE_SAMPLE_DECISION",
+    "TASK_EXTRACT_STATIC_STRONG_EVIDENCE",
+    "build_evidence_profile_task_spec",
+    "build_static_strong_task_spec",
+    "build_verdict_task_spec",
+    "build_verdict_pre_review_task_spec",
+    "build_verdict_review_task_spec",
+    "build_sample_decision_task_spec",
+    "evidence_task_handlers",
+    "run_evidence_profile_task",
+    "synthesize_sample_verdict_task",
+    "pre_review_sample_verdict_task",
+    "review_sample_verdict_task",
+    "finalize_sample_decision_task",
+    "finalize_sample_decision",
+    "verdict_task_handlers",
+    "verdict_pre_review_task_handlers",
+    "verdict_review_task_handlers",
+    "verdict_finalization_task_handlers",
+    "TASK_BUILD_BEHAVIOR_BLOCKS",
+    "TASK_BUILD_BEHAVIOR_INDEX",
+    "TASK_NORMALIZE_BEHAVIOR_TRACE",
+    "behavior_task_handlers",
+    "build_behavior_task_specs",
+    "run_behavior_task_graph",
+    "TASK_BUILD_COARSE_PROCESS_TREE",
+    "TASK_BUILD_LOGICAL_SLICE_INDEX",
+    "TASK_COLLECT_PROCESS_FACTS",
+    "TASK_TREE_FILTER_EVENTS",
+    "AnalysisSessionState",
+    "ArtifactRef",
+    "ArtifactStore",
+    "FactBroker",
+    "SessionFact",
+    "TaskContext",
+    "TaskResult",
+    "TaskRunner",
+    "TaskSpec",
+    "build_coarse_task_specs",
+    "coarse_task_handlers",
+    "run_coarse_task_graph",
+]

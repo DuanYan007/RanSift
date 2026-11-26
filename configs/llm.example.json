@@ -1,0 +1,8 @@
+{
+  "model": "YOUR_MODEL_ID",
+  "base_url": "https://api.example.invalid/v1",
+  "api_key_env": "RANSIFT_API_KEY",
+  "temperature": 0.0,
+  "timeout_seconds": 240,
+  "max_tokens": null
+}

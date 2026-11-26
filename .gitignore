@@ -1,0 +1,31 @@
+# Local environments and generated output
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+outputs/
+results/
+.cache/
+
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+*.local.json
+*.local.yaml
+*.local.yml
+credentials/
+secrets/
+
+# Dataset payloads and submitted executables are distributed separately
+/data/
+/datasets/
+/samples/
+*.exe
+*.dll
+*.pml
+*.etl
+*.zip
+*.7z

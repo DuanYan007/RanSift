@@ -1,0 +1,60 @@
+{
+  "schema_version": "harness-output-layout-v1",
+  "output_root": "outputs",
+  "session_dir_template": "{sample_id}",
+  "directories": {
+    "inputs": "inputs",
+    "first_layer": "first_layer",
+    "behavior": "behavior",
+    "agents": "agents",
+    "audit": "audit",
+    "verdict": "verdict",
+    "static": "static"
+  },
+  "agent_directories": {
+    "file_discovery": "file_discovery",
+    "file_transformation": "file_transformation",
+    "ransom_note": "ransom_note",
+    "registry": "registry",
+    "process": "process",
+    "recovery": "recovery",
+    "anti_analysis": "anti_analysis"
+  },
+  "task_stage_map": {
+    "register_inputs": "inputs",
+    "build_logical_slice_index": "first_layer",
+    "collect_process_facts": "first_layer",
+    "build_coarse_process_tree": "first_layer",
+    "tree_filter_events": "first_layer",
+    "normalize_behavior_trace": "behavior",
+    "build_behavior_index": "behavior",
+    "build_behavior_blocks": "behavior",
+    "evidence_file_discovery": "agents/file_discovery",
+    "evidence_file_transformation": "agents/file_transformation",
+    "evidence_ransom_note": "agents/ransom_note",
+    "evidence_registry": "agents/registry",
+    "evidence_process": "agents/process",
+    "evidence_recovery": "agents/recovery",
+    "evidence_anti_analysis": "agents/anti_analysis",
+    "evidence_audit": "audit",
+    "synthesize_sample_verdict": "verdict",
+    "extract_static_strong_evidence": "static",
+    "review_sample_verdict": "audit",
+    "pre_review_sample_verdict": "audit",
+    "finalize_sample_decision": "verdict"
+  },
+  "files": {
+    "input_manifest": "inputs/input_manifest.json",
+    "session_state": "session_state.json",
+    "summary": "summary.json"
+  },
+  "description": {
+    "inputs": "Copied or referenced raw inputs and input manifest.",
+    "first_layer": "Logical slicing, process facts, process tree, and tree-filtered event artifacts.",
+    "behavior": "Normalized behavior trace, behavior indexes, and behavior blocks.",
+    "agents": "Per-agent evidence-loop outputs.",
+    "audit": "Evidence review, diagnostics, and consistency checks.",
+    "verdict": "Final verdict, attack story, and model response artifacts.",
+    "static": "Deterministic strong static evidence and static candidate claims."
+  }
+}

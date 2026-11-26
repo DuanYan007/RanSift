@@ -1,0 +1,2 @@
+Time of Day,Process Name,PID,Operation,Path,Result,Detail
+00:00:01,demo.exe,42,WriteFile,C:\Demo\output.txt,SUCCESS,"Offset: 0, Length: 4"
