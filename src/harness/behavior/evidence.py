@@ -1022,8 +1022,9 @@ class EvidenceTools:
         after = max(0, min(after, 20))
         target_block = self.store.get_block(block_id)
         process_key = target_block.get("process_instance", {}).get("key")
+        level = 'micro' if target_block.get('level') == 'micro' else 'macro'
         blocks = [
-            block for block in self.store.blocks_payload.get("macro_blocks", [])
+            block for block in self.store.blocks_payload.get(level+'_blocks', [])
             if block.get("process_instance", {}).get("key") == process_key
         ]
         blocks.sort(key=lambda block: block.get("order_range", [0])[0])
@@ -1032,7 +1033,7 @@ class EvidenceTools:
             return ToolResult(
                 tool_name="neighbor_blocks",
                 query={"block_id": block_id, "before": before, "after": after},
-                limitations=("block is not a macro block or has no same-process timeline",),
+                limitations=("block has no same-level, same-process timeline",),
             )
         start = max(0, position - before)
         end = min(len(blocks), position + after + 1)
@@ -1045,7 +1046,7 @@ class EvidenceTools:
             returned_count=len(selected),
             evidence_refs=refs,
             blocks=tuple(compact_block_for_tool(block) for block in selected),
-            limitations=("same-process macro-block timeline",),
+            limitations=(f"same-process {level}-block timeline",),
         )
 
     def summarize_operations(self, limit: int = DEFAULT_LIMIT) -> ToolResult:
@@ -1224,6 +1225,8 @@ def compact_block_for_tool(block: dict[str, Any], child_limit: int = 20) -> dict
         compact["child_block_ids_omitted"] = len(child_ids) - child_limit
     if "source_offsets" in block:
         compact["source_offsets_omitted"] = len(block.get("source_offsets", []))
+    if 'parent_block_id' in block:
+        compact['parent_block_id'] = block['parent_block_id']
     return compact
 
 

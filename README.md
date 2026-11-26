@@ -70,7 +70,7 @@ Static content enters final adjudication. Without that argument, analysis uses l
 
 - `result.json`: final label or failure, elapsed time, request counts and token usage.
 - `api-calls.jsonl`: request phase, investigator, elapsed time, status and returned usage.
-- `prepared/`: evidence catalog, phase fragments, checkpoints and configuration.
+- `prepared/`: evidence catalog, separate micro/macro fragments, checkpoints and configuration.
 - `outputs/<sample-id>/`: investigator findings, evidence references, reasoning, review and final decision.
 
 Detailed outputs contain submitted evidence and local file references. Keep them private unless reviewed for sharing.

@@ -361,7 +361,8 @@ class StreamingCatalogEvidenceTools(CatalogEvidenceTools):
             limit,
         )
         matched_blocks = []
-        for block in self.catalog_store.blocks_payload["phase_blocks"]:
+        block_level = 'macro_blocks' if self.catalog_store.catalog.get('hierarchical_fragments') else 'phase_blocks'
+        for block in self.catalog_store.blocks_payload[block_level]:
             candidates = [normalize_key(block.get("target_scope") or "")]
             candidates.extend(normalize_key(item) for item in block.get("target_examples", []))
             if any(target_matches(candidate, normalized, prefix) for candidate in candidates):

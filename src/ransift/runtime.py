@@ -8,6 +8,7 @@ import os
 import time
 
 from harness.behavior.catalog import build_behavior_catalog
+from harness.behavior.hierarchical_fragments import build_hierarchical_fragments
 from harness.behavior_snapshot import BehaviorSnapshotSample
 from harness.snapshot_pipeline import run_analysis_pipeline_from_behavior_snapshot
 from .sample import SampleDirectory, SampleError, FILES
@@ -107,6 +108,8 @@ def analyze(sample_dir,output,*,client=None,config_path=None,static_sample=None,
     sample_id='sample-'+digests['normalized_events.jsonl'][:16]
     catalog=build_behavior_catalog(trace_path=sample.root/'normalized_events.jsonl',
         phase_blocks_path=prepared/'phase_blocks.jsonl',checkpoints_path=prepared/'checkpoints.json')
+    catalog['hierarchical_fragments']=build_hierarchical_fragments(
+        sample.root/'normalized_events.jsonl',prepared/'micro_fragments.jsonl',prepared/'macro_fragments.jsonl')
     write_json(prepared/'catalog.json',catalog)
     summary={'schema_version':'harness-behavior-trace-summary-v1','event_count':catalog['event_count'],
         'time_inversions':catalog['trace_time_inversions'],'node_count':len(json.loads((sample.root/'process_tree.json').read_text(encoding='utf-8-sig'))['node_index'])}
@@ -117,7 +120,8 @@ def analyze(sample_dir,output,*,client=None,config_path=None,static_sample=None,
     prepared_seconds=time.monotonic()-start
     if prepare_only:
         result={'status':'prepared','sample_id':sample_id,'event_count':catalog['event_count'],
-                'preparation_seconds':prepared_seconds,'model_requests':0}
+                'preparation_seconds':prepared_seconds,'model_requests':0,
+                'fragment_counts':{level:catalog['hierarchical_fragments'][level]['count'] for level in ('micro','macro')}}
         write_json(target/'result.json',result);return result
     for name in ['default.json','output_layout.json']:write_json(prepared/name,resource(name))
     record={'artifacts':{'catalog_sha256':sha256(prepared/'catalog.json'),
@@ -149,6 +153,7 @@ def analyze(sample_dir,output,*,client=None,config_path=None,static_sample=None,
     except Exception as exc:
         result={'status':'failed','verdict':None,'sample_id':sample_id,'error_type':type(exc).__name__}
     result.update(preparation_seconds=prepared_seconds,analysis_seconds=time.monotonic()-run_start,
+        fragment_counts={level:catalog['hierarchical_fragments'][level]['count'] for level in ('micro','macro')},
         model_requests=len(recorded.calls),successful_requests=sum(x['status']=='success' for x in recorded.calls),
         failed_requests=sum(x['status']=='error' for x in recorded.calls),
         input_tokens=sum((x.get('usage') or {}).get('prompt_tokens',0) or 0 for x in recorded.calls),

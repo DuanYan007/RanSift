@@ -77,6 +77,9 @@ class CatalogEvidenceTools(EvidenceTools):
         )
 
     def get_block_events(self, block_id: str, representative_only: bool = True, limit: int = DEFAULT_LIMIT) -> ToolResult:
+        block = self.catalog_store.get_block(block_id)
+        if block.get('level') in ('micro', 'macro'):
+            return super().get_block_events(block_id, representative_only=representative_only, limit=limit)
         if representative_only:
             result = super().get_block_events(block_id, representative_only=True, limit=limit)
             return replace(

@@ -21,7 +21,7 @@ Use a new directory outside the sample directory. An ancestor of the sample dire
 | Path | Contents |
 | --- | --- |
 | `input.json` | Sample identifier, input hashes, validation scope and static-input status |
-| `prepared/` | Catalog, phase fragments, byte checkpoints, trace summary and configuration |
+| `prepared/` | Catalog, `micro_fragments.jsonl`, `macro_fragments.jsonl`, legacy phase artifact, byte checkpoints, trace summary and configuration |
 | `api-calls.jsonl` | Request phase, agent ID, elapsed time, success/error status and returned token usage |
 | `outputs/<sample-id>/` | Task state, investigator outputs, reference mappings, model exchanges, reasoning and final decision |
 | `result.json` | Overall status, label, timing and usage totals |

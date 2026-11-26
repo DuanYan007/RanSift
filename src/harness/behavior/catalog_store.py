@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from collections.abc import Iterator, Sequence
 from pathlib import Path
 from typing import Any
@@ -122,22 +123,70 @@ class CatalogEvidenceStore:
     def blocks_payload(self) -> dict[str, Any]:
         if self._blocks_payload is None:
             blocks = load_jsonl(self.blocks_path)
-            # The catalog exposes one phase level. Evidence-tool selectors
-            # request macro or micro blocks, so both selectors resolve to the
-            # same bounded phase units and keep the original row-level level.
-            self._blocks_payload = {
-                "phase_blocks": blocks,
-                "micro_blocks": blocks,
-                "macro_blocks": blocks,
-            }
+            hierarchy = self.catalog.get('hierarchical_fragments')
+            if hierarchy is None:
+                # Older catalogs expose phase fragments through both selectors.
+                self._blocks_payload = {'phase_blocks': blocks, 'micro_blocks': blocks, 'macro_blocks': blocks}
+            else:
+                self._blocks_payload = self._load_hierarchy(hierarchy, blocks)
         return self._blocks_payload
+
+    def _load_hierarchy(self, hierarchy, phases):
+        from .hierarchical_fragments import SCHEMA
+        if hierarchy.get('schema_version') != SCHEMA or hierarchy.get('event_count') != self.event_count:
+            raise ValueError('Invalid hierarchical fragment catalog')
+        payload = {'phase_blocks': phases}
+        for level in ('micro', 'macro'):
+            meta = hierarchy[level]
+            name = meta['file']
+            if not isinstance(name, str) or not name or Path(name).name != name:
+                raise ValueError('Fragment artifact must be a sibling file')
+            path = self.catalog_path.parent / name
+            if path.is_symlink() or not path.is_file():
+                raise ValueError('Fragment artifact is missing or symlinked')
+            digest = hashlib.sha256()
+            with path.open('rb') as stream:
+                for chunk in iter(lambda: stream.read(1024*1024), b''):
+                    digest.update(chunk)
+            if digest.hexdigest() != meta['sha256']:
+                raise ValueError('Fragment artifact digest mismatch')
+            rows = load_jsonl(path)
+            if (len(rows) != meta['count'] or any(row.get('level') != level or row.get('schema_version') != SCHEMA for row in rows)
+                    or sum(row['event_count'] for row in rows) != self.event_count):
+                raise ValueError('Fragment level or event count mismatch')
+            payload[level+'_blocks'] = rows
+        micro = {row['block_id']: row for row in payload['micro_blocks']}
+        macro = {row['block_id']: row for row in payload['macro_blocks']}
+        if (len(micro) != len(payload['micro_blocks']) or len(macro) != len(payload['macro_blocks'])
+                or set(micro) & set(macro)):
+            raise ValueError('Fragment IDs must be unique across both levels')
+        children_seen = set()
+        for parent in macro.values():
+            children = parent['child_block_ids']
+            if not children or len(set(children)) != len(children):
+                raise ValueError('Invalid macro child references')
+            total = 0
+            for child_id in children:
+                if child_id not in micro or child_id in children_seen:
+                    raise ValueError('Missing or multiply assigned micro fragment')
+                child = micro[child_id]
+                if child.get('parent_block_id') != parent['block_id'] or child['process_instance']['key'] != parent['process_instance']['key']:
+                    raise ValueError('Fragment parent or process mismatch')
+                children_seen.add(child_id)
+                total += child['event_count']
+            if total != parent['event_count']:
+                raise ValueError('Macro count differs from its children')
+        if children_seen != set(micro):
+            raise ValueError('Micro fragment lacks a macro parent')
+        return payload
 
     @property
     def blocks_by_id(self) -> dict[str, dict[str, Any]]:
         if self._blocks_by_id is None:
             self._blocks_by_id = {
                 str(block["block_id"]): block
-                for block in self.blocks_payload["phase_blocks"]
+                for level in ("phase_blocks", "micro_blocks", "macro_blocks")
+                for block in self.blocks_payload[level]
                 if block.get("block_id")
             }
         return self._blocks_by_id
@@ -236,18 +285,20 @@ class CatalogEvidenceStore:
                 {"key": key, "count": len(offsets)}
                 for key, offsets in sorted(entries.items(), key=lambda item: (-len(item[1]), item[0]))[:limit]
             ]
-        by_kind: dict[str, int] = {}
-        for block in self.blocks_payload["phase_blocks"]:
-            kind = str(block.get("behavior_kind") or "")
-            by_kind[kind] = by_kind.get(kind, 0) + 1
+        levels = ('micro', 'macro') if self.catalog.get('hierarchical_fragments') else ('phase',)
+        block_kinds = {}
+        for level in levels:
+            by_kind: dict[str, int] = {}
+            for block in self.blocks_payload[level+'_blocks']:
+                kind = str(block.get('behavior_kind') or '')
+                by_kind[kind] = by_kind.get(kind, 0) + 1
+            block_kinds[level] = [{'kind': kind, 'count': count}
+                                 for kind, count in sorted(by_kind.items(), key=lambda item: (-item[1], item[0]))]
         return {
             "index_names": sorted(self.index_maps),
             "index_key_counts": {name: len(entries) for name, entries in self.index_maps.items()},
             "common_index_keys": compact_indexes,
-            "block_kinds": {"phase": [
-                {"kind": kind, "count": count}
-                for kind, count in sorted(by_kind.items(), key=lambda item: (-item[1], item[0]))
-            ]},
+            "block_kinds": block_kinds,
             "catalog_mode": True,
             "query_rules": (
                 "list_events keys are normalized to lowercase.",

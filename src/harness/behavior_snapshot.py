@@ -184,6 +184,7 @@ def hydrate_behavior_snapshot(state: AnalysisSessionState, snapshot: BehaviorSna
     trace_summary = compact_trace_summary(snapshot.trace_summary, snapshot)
     catalog_summary = compact_catalog_summary(snapshot.catalog, snapshot)
     phase_summary = compact_phase_summary(snapshot.catalog, snapshot)
+    block_representation = 'hierarchical_fragments' if snapshot.catalog.get('hierarchical_fragments') else 'phase_blocks'
     trace_artifacts = {
         "behavior_trace": artifact(
             "normalize_behavior_trace", "behavior_trace", "behavior_trace", snapshot.trace_path,
@@ -218,11 +219,11 @@ def hydrate_behavior_snapshot(state: AnalysisSessionState, snapshot: BehaviorSna
     block_artifacts = {
         "behavior_blocks": artifact(
             "build_behavior_blocks", "behavior_blocks", "behavior_blocks", snapshot.phase_blocks_path,
-            {"representation": "phase_blocks", "catalog_mode": True, "snapshot": provenance},
+            {"representation": block_representation, "catalog_mode": True, "snapshot": provenance},
         ),
         "behavior_blocks_meta": artifact(
             "build_behavior_blocks", "behavior_blocks_meta", "behavior_blocks_meta", snapshot.catalog_path,
-            {"representation": "phase_blocks", "snapshot": provenance},
+            {"representation": block_representation, "snapshot": provenance},
         ),
     }
     state.commit(TaskResult.completed(
@@ -300,6 +301,16 @@ def compact_catalog_summary(catalog: dict[str, Any], snapshot: BehaviorSnapshotS
 
 
 def compact_phase_summary(catalog: dict[str, Any], snapshot: BehaviorSnapshotSample) -> dict[str, Any]:
+    hierarchy = catalog.get('hierarchical_fragments')
+    if hierarchy:
+        return {'schema_version': 'behavior-fragment-summary-v1',
+                'source': 'sealed_behavior_snapshot', 'snapshot': snapshot.provenance(),
+                'event_count': hierarchy['event_count'],
+                'micro_block_count': hierarchy['micro']['count'],
+                'macro_block_count': hierarchy['macro']['count'],
+                'parameters': hierarchy['parameters'],
+                'by_behavior_kind': hierarchy['macro']['by_behavior_kind'],
+                'limitations': ['Macro fragments aggregate same-process micro fragments; temporal order alone does not establish causality.']}
     phases = dict(catalog.get("phase_blocks") or {})
     return {
         "schema_version": "behavior-phase-block-summary-v1",
